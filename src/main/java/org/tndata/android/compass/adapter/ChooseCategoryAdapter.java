@@ -2,7 +2,6 @@ package org.tndata.android.compass.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,8 +46,6 @@ public class ChooseCategoryAdapter extends RecyclerView.Adapter{
                                  List<TDCCategory> categories){
         mContext = context;
         mListener = listener;
-
-        Log.d("ChooseCategories", categories.toString());
 
         //Init counts and lists
         mGroupCount = 0;
@@ -140,8 +137,9 @@ public class ChooseCategoryAdapter extends RecyclerView.Adapter{
         }
         //Category
         else{
+            boolean last = tuple.mPosition == mCategoryLists.get(tuple.mGroup).size();
             CategoryViewHolder holder = (CategoryViewHolder)rawHolder;
-            holder.bind(mCategoryLists.get(tuple.mGroup).get(tuple.mPosition-1));
+            holder.bind(mCategoryLists.get(tuple.mGroup).get(tuple.mPosition-1), last);
         }
     }
 
@@ -193,60 +191,16 @@ public class ChooseCategoryAdapter extends RecyclerView.Adapter{
 
 
     /**
-     * View holder for a category.
-     *
-     * @author Ismael Alonso.
-     * @version 1.0.0
-     */
-    protected class CategoryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-        private TDCCategory mCategory;
-
-        private ImageView mImage;
-        private TextView mCaption;
-
-
-        /**
-         * Constructor.
-         *
-         * @param rootView the view associated with this holder.
-         */
-        public CategoryViewHolder(View rootView){
-            super(rootView);
-
-            mImage = (ImageView)rootView.findViewById(R.id.category_image);
-            mCaption = (TextView)rootView.findViewById(R.id.choose_category_category_caption);
-
-            rootView.setOnClickListener(this);
-        }
-
-        /**
-         * Binds a category to this holder.
-         *
-         * @param category the category to be bound.
-         */
-        public void bind(TDCCategory category){
-            mCategory = category;
-
-            ImageLoader.loadBitmap(mImage, category.getIconUrl());
-            mCaption.setText(category.getTitle());
-        }
-
-        @Override
-        public void onClick(View v){
-            mListener.onCategorySelected(mCategory);
-        }
-    }
-
-
-    /**
      * View Holder for a group title header.
      *
      * @author Ismael Alonso
      * @version 1.1.0
      */
     protected class HeaderHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-        private ImageView mChevron;
         private TextView mHeader;
+        private ImageView mChevron;
+
+        private View mTopSeparator;
 
 
         /**
@@ -257,8 +211,10 @@ public class ChooseCategoryAdapter extends RecyclerView.Adapter{
         public HeaderHolder(View rootView){
             super(rootView);
 
-            mChevron = (ImageView)rootView.findViewById(R.id.header_chevron);
             mHeader = (TextView)rootView.findViewById(R.id.header_text);
+            mChevron = (ImageView)rootView.findViewById(R.id.header_chevron);
+
+            mTopSeparator = rootView.findViewById(R.id.header_separator_top);
 
             rootView.setOnClickListener(this);
         }
@@ -276,10 +232,67 @@ public class ChooseCategoryAdapter extends RecyclerView.Adapter{
         public void onClick(View v){
             if (toggle(getAdapterPosition())){
                 mChevron.setImageResource(R.drawable.ic_chevron_down_white_24dp);
+                mTopSeparator.setVisibility(View.VISIBLE);
             }
             else{
                 mChevron.setImageResource(R.drawable.ic_chevron_right_white_24dp);
+                mTopSeparator.setVisibility(View.INVISIBLE);
             }
+        }
+    }
+
+
+    /**
+     * View holder for a category.
+     *
+     * @author Ismael Alonso.
+     * @version 1.0.0
+     */
+    protected class CategoryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+        private TDCCategory mCategory;
+
+        private ImageView mImage;
+        private TextView mCaption;
+
+        private View mBottomSeparator;
+
+
+        /**
+         * Constructor.
+         *
+         * @param rootView the view associated with this holder.
+         */
+        public CategoryViewHolder(View rootView){
+            super(rootView);
+
+            mImage = (ImageView)rootView.findViewById(R.id.category_image);
+            mCaption = (TextView)rootView.findViewById(R.id.choose_category_category_caption);
+            mBottomSeparator = rootView.findViewById(R.id.category_separator_bottom);
+
+            rootView.setOnClickListener(this);
+        }
+
+        /**
+         * Binds a category to this holder.
+         *
+         * @param category the category to be bound.
+         */
+        public void bind(TDCCategory category, boolean last){
+            mCategory = category;
+
+            ImageLoader.loadBitmap(mImage, category.getIconUrl());
+            mCaption.setText(category.getTitle());
+            if (last){
+                mBottomSeparator.setVisibility(View.VISIBLE);
+            }
+            else{
+                mBottomSeparator.setVisibility(View.INVISIBLE);
+            }
+        }
+
+        @Override
+        public void onClick(View v){
+            mListener.onCategorySelected(mCategory);
         }
     }
 
